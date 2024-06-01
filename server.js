@@ -1,23 +1,13 @@
 const express = require("express");
-const exphbs = require("express-handlebars");
+
+const hbs = require("./libs/handlebars");
+const db = require("./libs/postgresql");
+const getCurrentTimestamp = require("./helpers/getTimestamp");
+
 const path = require("path");
 
 const app = express();
 const port = 3000;
-
-const hbs = exphbs.create({
-  helpers: {
-    increment: (value) => {
-      return value + 1;
-    },
-    isEqual: (value1, value2, options) => {
-      const isEqual =
-        value1 === value2 ? options.fn(this) : options.inverse(this);
-
-      return isEqual;
-    },
-  },
-});
 
 app.use(express.urlencoded({ extended: true }));
 
@@ -35,10 +25,14 @@ const itemObj = {
 
 let todos = [itemObj];
 
-app.get("/", (req, res) => {
+app.get("/", async (req, res) => {
+  const query = `SELECT *
+  FROM public."Todos" ORDER BY "createdAt" ASC;`;
+  const result = await db.query(query);
+
   const data = {
     title: "Todo App",
-    todos: todos,
+    todos: result.rows,
   };
 
   res.render("home", data);
@@ -52,29 +46,35 @@ app.get("/create", (req, res) => {
   res.render("create", data);
 });
 
-app.post("/todos", (req, res) => {
+app.post("/todos", async (req, res) => {
   const title = req.body.title;
   const note = req.body.note;
 
-  const tmpTodo = { id: Date.now(), title, note, status: "Todo" };
-
-  todos.push(tmpTodo);
-
-  res.redirect("/");
-});
-
-app.get("/delete/:id", (req, res) => {
-  const id = req.params.id;
-
-  todos = todos.filter((item) => item.id != id);
+  const query = `INSERT INTO public."Todos"
+                (title, note, status, "createdAt")
+                VALUES (  '${title}', '${note}', 'Todo', '${getCurrentTimestamp()}');`;
+  await db.query(query);
 
   res.redirect("/");
 });
 
-app.get("/update/:id", (req, res) => {
+app.get("/delete/:id", async (req, res) => {
   const id = req.params.id;
 
-  const todo = todos.find((item) => item.id == id);
+  const query = `DELETE FROM public."Todos"
+                    WHERE id=${id};`;
+  await db.query(query);
+
+  res.redirect("/");
+});
+
+app.get("/update/:id", async (req, res) => {
+  const id = req.params.id;
+
+  const query = `SELECT * FROM public."Todos" WHERE id=${id};`;
+  const result = await db.query(query);
+
+  const todo = result.rows[0];
   if (!todo) {
     res.redirect("/");
   }
@@ -87,23 +87,16 @@ app.get("/update/:id", (req, res) => {
   res.render("update", data);
 });
 
-app.post("/todos/update/:id", (req, res) => {
+app.post("/todos/update/:id", async (req, res) => {
   const id = req.params.id;
   const title = req.body.title;
   const note = req.body.note;
   const status = req.body.status;
 
-  todos = todos.map((item) => {
-    if (item.id == id) {
-      item.title = title;
-      item.note = note;
-      item.status = status;
-
-      return item;
-    } else {
-      return item;
-    }
-  });
+  const query = `UPDATE public."Todos"
+                    SET  title='${title}', note='${note}', status='${status}'
+                    WHERE id=${id};`;
+  await db.query(query);
 
   res.redirect("/");
 });

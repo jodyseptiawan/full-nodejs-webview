@@ -12,6 +12,7 @@
           <th>Title</th>
           <th>Note</th>
           <th>Status</th>
+          <th>Created At</th>
           <th>Action</th>
         </tr>
       </thead>
@@ -19,9 +20,10 @@
         {{#each todos}}
           <tr>
             <td style="width: 1%;">{{increment @index}}</td>
-            <td style="width: 30%;">{{this.title}}</td>
-            <td style="width: 30%;">{{this.note}}</td>
-            <td style="width: 30%;">{{this.status}}</td>
+            <td style="width: 25%;">{{this.title}}</td>
+            <td style="width: 25%;">{{this.note}}</td>
+            <td style="width: 25%;">{{this.status}}</td>
+            <td style="width: 25%;">{{formatDate this.createdAt}}</td>
             <td class="flex gap-x-4 justify-stretch" style="width: 100%;">
               <button
                 onclick="handleUpdate({{this.id}})"
