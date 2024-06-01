@@ -1,0 +1,40 @@
+<div class="container mx-auto h-screen flex justify-center items-center">
+  <form action="/todos/update/{{todo.id}}" method="POST" class="w-[30%]">
+    <h1 class="text-center text-2xl font-bold">Update Todo Form</h1>
+    <div class="flex flex-col mt-8">
+      <label for="title" class="text-sm">Title</label>
+      <input
+        id="title"
+        name="title"
+        type="text"
+        placeholder="Type Title here ..."
+        class="w-full border border-2 border-gray-400 p-2 rounded-md mt-1 focus:outline-none"
+        value="{{todo.title}}"
+      />
+    </div>
+    <div class="mt-4 flex flex-col">
+      <label for="note" class="text-sm">Note</label>
+      <textarea
+        id="note"
+        name="note"
+        placeholder="Type Note here ..."
+        class="w-full border border-2 border-gray-400 p-2 rounded-md mt-1 focus:outline-none"
+      >{{todo.note}}</textarea>
+    </div>
+    <div class="mt-4 flex flex-col">
+      <label for="status" class="text-sm">Status</label>
+        <select
+            name="status"
+            id="status"
+            class="w-full border border-2 border-gray-400 p-2 rounded-md mt-1 focus:outline-none"
+        >
+            <option value="Todo" {{#isEqual todo.status "Todo"}}selected{{/isEqual}}>Todo</option>
+            <option value="Doing" {{#isEqual todo.status "Doing"}}selected{{/isEqual}}>Doing</option>
+            <option value="Done" {{#isEqual todo.status "Done"}}selected{{/isEqual}}>Done</option>
+        </select>
+    </div>
+    <div class="mt-10 flex flex-col">
+      <button class="btn-create-todo rounded-md">Submit</button>
+    </div>
+  </form>
+</div>
